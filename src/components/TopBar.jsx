@@ -1,6 +1,8 @@
 import React from "react";
 import icon from "../assets/Messenger.svg";
+import { useNavigate } from "react-router-dom";
 const TopBar = ({ userLog }) => {
+  const navigate = useNavigate();
   return (
     <section
       style={{
@@ -8,8 +10,8 @@ const TopBar = ({ userLog }) => {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        // box shadow bottom
-        boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.25)",
+        // boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.25)",
+        borderBottom: "1px solid grey",
       }}
     >
       <div
@@ -18,6 +20,10 @@ const TopBar = ({ userLog }) => {
           display: "flex",
           alignItems: "center",
           gap: 10,
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          navigate("/", 0);
         }}
       >
         <img

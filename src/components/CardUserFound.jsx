@@ -1,22 +1,8 @@
-import React, { useEffect, useState } from "react";
-
-const CardUserFound = ({ user }) => {
-  const [loading, setLoading] = useState(true);
-
-  console.log(user);
-
-  useEffect(() => {
-    if (user === undefined) {
-      setLoading(true);
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+const CardUserFound = ({ user, handelNewRequest, loading }) => {
   if (loading) {
     return <h1>Finding user</h1>;
   }
 
-  console.log(user.data);
   return (
     <section>
       {user.data === "not found" ? (
@@ -31,14 +17,12 @@ const CardUserFound = ({ user }) => {
           <section
             style={{
               marginTop: "1rem",
-              // border: "1px solid",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
               width: "100%",
               padding: "1rem",
-              // boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
               borderRadius: "4px",
             }}
           >
@@ -64,8 +48,11 @@ const CardUserFound = ({ user }) => {
                 margin: "1rem 0",
                 borderRadius: "4px",
               }}
+              onClick={() => {
+                handelNewRequest();
+              }}
             >
-              Star Chatting
+              Send chat Request
             </button>
           </section>
         </section>

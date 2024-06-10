@@ -1,20 +1,55 @@
-import React, { useEffect, useState } from "react";
-import ChatCard from "./ChatCard";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchDataPost } from "../utils/fetch";
+import { useChat } from "../context/chatContex";
+import { socket } from "../utils/SocketConfig";
+import { v4 as uuidv4 } from "uuid";
+
+import ChatCard from "./ChatCard";
 import CardUserFound from "./CardUserFound";
 
-const SidebarChat = ({ chatId }) => {
+const SidebarChat = ({ userLog }) => {
   const navigator = useNavigate();
-  const [userFound, setUserFound] = useState();
+  const [userFound, setUserFound] = useState("");
   const [isSearch, setIsSearch] = useState(false);
-  const [userNewChat, setUserNewChat] = useState();
+  const [userForChat, setUserForChat] = useState();
+  const [loading, setLoading] = useState(true);
+
+  const { chatList, chatRequests, setChatRequests } = useChat();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (userFound === "") {
       setIsSearch(false);
     }
   }, [userFound]);
+
+  useEffect(() => {
+    const loadRequest = () => {
+      socket.on("ReceiveRequest", (data) => {
+        const newRequest = {
+          id: data.id,
+          avatar: data.avatar,
+          name: data.name,
+          lastname: data.lastname,
+          RequestDate: data.date,
+          senderId: data.SenderId,
+        };
+
+        if (
+          chatRequests.filter((req) => req.senderId === data.SenderId).length >
+          0
+        ) {
+          return;
+        }
+
+        setChatRequests((prev) => [...prev, newRequest]);
+        return;
+      });
+    };
+    loadRequest();
+  }, [socket]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,42 +60,48 @@ const SidebarChat = ({ chatId }) => {
     });
 
     if (res.status === 404) {
-      setUserNewChat("");
+      setUserForChat("");
+      setLoading(false);
+    } else {
+      setUserForChat(res.data);
+      setLoading(false);
     }
-
-    setUserNewChat(res.data);
   };
 
-  const chatList = [
-    // {
-    //   idx: 0,
-    //   name: "Shirley Duran",
-    //   avatar:
-    //     "https://scontent.fbaq6-1.fna.fbcdn.net/v/t39.30808-6/301643242_5291278820993749_4662011864101510598_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeGd3342k2zqYFtW-jRmIgo4VT1DCIXBQd5VPUMIhcFB3u95XUpW2Evmmx2bqPWwNzoHvwJ1tINGkLaKOm9Kai3i&_nc_ohc=nQp53yDbKowQ7kNvgGc_Yg0&_nc_ht=scontent.fbaq6-1.fna&oh=00_AYAiuKU71CKHswMa2gahkigEG6bO6ClZe8gqJvZfCzcHMQ&oe=6667B6B8",
-    //   who: "You",
-    //   message: "Hola como estás",
-    //   time: "1:00",
-    // },
-    // {
-    //   idx: 1,
-    //   name: "Liliana Navarro",
-    //   avatar:
-    //     "https://scontent.fbaq6-1.fna.fbcdn.net/v/t39.30808-6/410216657_7049978238397152_1644814934708724000_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeEOeSKSLyoiwm9wft3hRC0e4WiaJZvmxyLhaJolm-bHIu75DppdZRBvFnOHZlLfMLGWazjGtHO3a8BguFLFfezF&_nc_ohc=Gb09LRV06CgQ7kNvgFrzJ6I&_nc_ht=scontent.fbaq6-1.fna&oh=00_AYCaRMARuZrP_ccu2NwkCWFhIDhf933vFUDkV5Cdhr0jBA&oe=6667B4DC",
-    //   who: "You",
-    //   message: "Hola Mundo",
-    //   time: "10:00",
-    // },
-    {
-      idx: 2,
-      name: "Diana Vidal",
-      avatar:
-        "https://scontent.fbaq6-1.fna.fbcdn.net/v/t39.30808-6/345896927_1225334521424411_8548276109390854675_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHYxA-47z4X37TNE8CLtCdSqjbr6ys5_h2qNuvrKzn-HYeuxpBea-e6bLiNeuqEuylSoXgtymFlXaimaTw6YlzT&_nc_ohc=trWY-_IlhuAQ7kNvgGN27DB&_nc_ht=scontent.fbaq6-1.fna&oh=00_AYDlrHCpCo5mApiYCQ2-dKJwqvNTItF6JQ-mL5DP2E5kPw&oe=6667D075",
-      who: "You",
-      message:
-        "Hola Amigo adjawdhkawhdkawhdkahwdkajhdwkjhawkdjhakwdhakjdwhkawdh",
-      time: "10:00",
-    },
-  ];
+  const handelNewRequest = async () => {
+    const today = new Date();
+    const date = today.toISOString().split("T")[0];
+
+    const data = {
+      id: uuidv4(),
+      SenderId: userLog.userInfo.id,
+      TargetId: userForChat.data.id,
+      name: userLog.userInfo.name,
+      lastname: userLog.userInfo.lastname,
+      avatar: userLog.avatarRoute,
+      date: date,
+    };
+
+    let res = await fetchDataPost(
+      "http://localhost:4040/api/chatRequest",
+      data
+    );
+
+    if (res.status === 208) {
+      alert("You already send a chat request to this person.");
+      setUserFound("");
+      document.querySelector("#userFound").value = "";
+      return;
+    }
+
+    if (res.status === 200) {
+      alert("Request sent successfully");
+      socket.emit("SendRequest", data);
+      setUserFound("");
+      document.querySelector("#userFound").value = "";
+      return;
+    }
+  };
 
   return (
     <div
@@ -74,8 +115,43 @@ const SidebarChat = ({ chatId }) => {
         flexDirection: "column",
       }}
     >
-      {/* <img src={userLog.avatarRoute} alt="" /> */}
       <h2 style={{ fontSize: "15px" }}>Chats</h2>
+
+      <div
+        className="Options"
+        style={{
+          fontSize: "12px",
+          display: "flex",
+          gap: "1rem",
+          marginTop: "5px",
+        }}
+      >
+        <Link
+          style={{
+            textDecoration: "none",
+            color: "blue",
+          }}
+        >
+          Messages
+        </Link>
+        <Link
+          style={{
+            textDecoration: "none",
+            color: "grey",
+          }}
+        >
+          Solicitude
+        </Link>
+        <Link
+          to={"/ChatRequest"}
+          style={{
+            textDecoration: "none",
+            color: "grey",
+          }}
+        >
+          Request
+        </Link>
+      </div>
 
       <form action="" style={{ marginTop: "5px" }} onSubmit={handleSubmit}>
         <div className="">
@@ -108,9 +184,15 @@ const SidebarChat = ({ chatId }) => {
         </div>
       </form>
       {isSearch ? (
-        <CardUserFound user={userNewChat} />
+        <CardUserFound
+          user={userForChat}
+          setUserFound={setUserFound}
+          userLog={userLog}
+          handelNewRequest={handelNewRequest}
+          loading={loading}
+        />
       ) : (
-        <ChatCard chats={chatList} chatId={chatId} />
+        <ChatCard chats={[...chatList].reverse()} />
       )}
 
       <div style={{ flexGrow: 1 }} />

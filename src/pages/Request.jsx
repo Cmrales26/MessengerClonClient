@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
-import SidebarChat from "../components/SidebarChat";
-import { useNavigate, useParams } from "react-router-dom";
-import ChatRoom from "../components/ChatRoom";
-import { fetchDataGet } from "../utils/fetch";
 import TopBar from "../components/TopBar";
+import { fetchDataGet } from "../utils/fetch";
+import SideBarRequest from "../components/SidebarRequest";
 import { socket } from "../utils/SocketConfig";
+import { useNavigate } from "react-router-dom";
 
-const Chat = () => {
-  const navigate = useNavigate();
-  const [userLog, setUserLog] = useState({});
+const Request = () => {
   const [loading, setLoading] = useState(true);
+  const [userLog, setUserLog] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getUserToken() {
@@ -37,7 +36,6 @@ const Chat = () => {
   if (userId !== undefined) {
     socket.emit("register", userId);
   }
-
   return (
     <section>
       <TopBar userLog={userLog} />
@@ -46,11 +44,10 @@ const Chat = () => {
           display: "flex",
         }}
       >
-        <SidebarChat userLog={userLog} />
-        <ChatRoom userLog={userLog} />
+        <SideBarRequest Request={true} userLog={userLog} />
       </section>
     </section>
   );
 };
 
-export default Chat;
+export default Request;
