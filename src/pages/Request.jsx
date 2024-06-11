@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import TopBar from "../components/TopBar";
-import { fetchDataGet } from "../utils/fetch";
+import { fetchDataGet, fetchDataPost } from "../utils/fetch";
 import SideBarRequest from "../components/SidebarRequest";
 import { socket } from "../utils/SocketConfig";
 import { useNavigate } from "react-router-dom";
+import { useChat } from "../context/chatContex";
 
 const Request = () => {
+  const navigate = useNavigate();
+  const { setChatRequests } = useChat();
+
   const [loading, setLoading] = useState(true);
   const [userLog, setUserLog] = useState({});
-  const navigate = useNavigate();
 
   useEffect(() => {
     async function getUserToken() {
@@ -25,7 +28,26 @@ const Request = () => {
       setLoading(false);
     }
     getUserToken();
-  }, [loading]);
+  }, [navigate]);
+
+  // Get Request
+  useEffect(() => {
+    console.log("entre a request");
+    if (loading === false && userLog.userInfo) {
+      let data = {
+        MyId: userLog.userInfo.id,
+      };
+      async function getMyRequest() {
+        const res = await fetchDataPost(
+          "http://localhost:4040/api/MyRequest",
+          data
+        );
+        setChatRequests(res.data);
+      }
+
+      getMyRequest();
+    }
+  }, [loading, userLog, setChatRequests]);
 
   if (loading) {
     return <h1>Loading...</h1>;

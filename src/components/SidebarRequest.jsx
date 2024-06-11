@@ -1,34 +1,68 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useChat } from "../context/chatContex";
 
 import RequestCard from "./RequestCard";
-import { useEffect } from "react";
-import { fetchDataPost } from "../utils/fetch";
 
-const SideBarRequest = ({ userLog }) => {
-  const { chatRequests, setChatRequests } = useChat();
+import SidebarNavigation from "./SidebarNavigation";
+import { fetchDataDelete, fetchDataPost } from "../utils/fetch";
+
+const SideBarRequest = () => {
+  const { chatRequests, nRequest, setNRequest, setChatRequests } = useChat();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let data = {
-      MyId: userLog.userInfo.id,
+  const handleAccept = async (data) => {
+    const apiData = {
+      chatId: data.RequestId,
+      user1: data.SenderId,
+      user2: data.TargetId,
     };
-    async function getMyRequest() {
-      const res = await fetchDataPost(
-        "http://localhost:4040/api/MyRequest",
-        data
-      );
-      setChatRequests(res.data);
-      console.log(res.data);
-    }
 
-    getMyRequest();
-  }, [chatRequests, setChatRequests]);
+    const dataChat = {
+      chatId: data.RequestId,
+      user1: data.SenderId,
+      user2: data.TargetId,
+      avatar: data.avatar,
+      name: data.name,
+      lastname: data.lastname,
+    };
+
+    const res = await fetchDataPost(
+      "http://localhost:4040/api/AcceptChatRequest",
+      apiData
+    );
+
+    if (res.status === 200) {
+      let resDelete = await fetchDataDelete(
+        `http://localhost:4040/api/DeleteChatRequest/${apiData.chatId}`
+      );
+
+      if (resDelete.status === 200) {
+        setNRequest((prev) => prev - 1);
+        navigate(`/chat/message/${dataChat.chatId}`, { state: dataChat });
+      }
+    }
+  };
+
+  const handleDecline = async (id) => {
+    const newChatRequests = chatRequests.filter(
+      (request) => request.RequestId !== id
+    );
+
+    const res = await fetchDataDelete(
+      `http://localhost:4040/api/DeleteChatRequest/${id}`
+    );
+
+    if (res.status === 200) {
+      setChatRequests(newChatRequests);
+      setNRequest((prev) => prev - 1);
+      return;
+    }
+  };
 
   return (
     <div
       style={{
-        width: "20%",
+        width: "30%",
         borderRight: "1px solid gray",
         padding: "1rem",
         height: "90vh",
@@ -39,42 +73,7 @@ const SideBarRequest = ({ userLog }) => {
     >
       <h2 style={{ fontSize: "15px" }}>Chats</h2>
 
-      <div
-        className="Options"
-        style={{
-          fontSize: "12px",
-          display: "flex",
-          gap: "1rem",
-          marginTop: "5px",
-        }}
-      >
-        <Link
-          to={"/"}
-          style={{
-            textDecoration: "none",
-            color: "grey",
-          }}
-        >
-          Messages
-        </Link>
-        <Link
-          style={{
-            textDecoration: "none",
-            color: "grey",
-          }}
-        >
-          Solicitude
-        </Link>
-        <Link
-          to={"/ChatRequest"}
-          style={{
-            textDecoration: "none",
-            color: "blue",
-          }}
-        >
-          Request
-        </Link>
-      </div>
+      <SidebarNavigation focus={"Request"} nRequest={nRequest} />
 
       <h3
         style={{
@@ -84,7 +83,11 @@ const SideBarRequest = ({ userLog }) => {
         Chat Request
       </h3>
 
-      <RequestCard request={[...chatRequests].reverse()} />
+      <RequestCard
+        request={[...chatRequests].reverse()}
+        handleDecline={handleDecline}
+        handleAccept={handleAccept}
+      />
 
       <div style={{ flexGrow: 1 }} />
 
@@ -101,6 +104,7 @@ const SideBarRequest = ({ userLog }) => {
         }}
         onClick={() => {
           localStorage.removeItem("token");
+          setChatRequests([]);
           navigate("/login");
         }}
       >

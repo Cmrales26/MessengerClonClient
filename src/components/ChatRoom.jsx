@@ -1,16 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { fetchDataPost } from "../utils/fetch";
 import { useChat } from "../context/chatContex";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-const ChatRoom = ({ chatId, userLog, userId }) => {
+const ChatRoom = ({ userLog }) => {
+  const { chatList, addChat } = useChat();
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState();
   const [loading, setLoading] = useState(true);
   const [ChatInfoUser, setChatInfoUser] = useState();
-
   const CurrentUserLogId = userLog.userInfo.id;
+  const navigate = useNavigate();
 
-  const { chatList, addChat } = useChat();
+  let { chatId } = useParams();
+  let { state } = useLocation();
+
+  useEffect(() => {
+    if (chatId !== undefined && state) {
+      setChatInfoUser(state);
+      setLoading(false);
+    } else {
+      navigate("/");
+    }
+  }, [ChatInfoUser, state]);
+
+  // if (chatId !== undefined) {
+  //   setLoading(false);
+  // }
 
   // useEffect(() => {
   //   const getInfoChat = async () => {
@@ -37,13 +53,13 @@ const ChatRoom = ({ chatId, userLog, userId }) => {
   //   getInfoChat();
   // }, [chatId, userId]);
 
-  const SendToSocket = () => {
-    const targetUser = ChatInfoUser.data.id || null;
-    const senderId = CurrentUserLogId;
-    socket.emit("sendMessage", { message, targetUser, senderId });
-  };
+  // const SendToSocket = () => {
+  //   const targetUser = ChatInfoUser.data.id || null;
+  //   const senderId = CurrentUserLogId;
+  //   socket.emit("sendMessage", { message, targetUser, senderId });
+  // };
 
-  if (loading) {
+  if (loading || ChatInfoUser === undefined) {
     return (
       <div
         className=""
@@ -88,7 +104,7 @@ const ChatRoom = ({ chatId, userLog, userId }) => {
           />
 
           <p>
-            {ChatInfoUser.data.name} {ChatInfoUser.data.lastname}
+            {ChatInfoUser.name} {ChatInfoUser.lastname}
           </p>
         </section>
 
@@ -135,13 +151,11 @@ const ChatRoom = ({ chatId, userLog, userId }) => {
               border: "none",
               backgroundColor: "#0084ff",
             }}
-            onClick={SendToSocket}
+            // onClick={SendToSocket}
           >
             {"Send"}
           </button>
         </section>
-
-        {/* Input chat */}
       </div>
     </div>
   );

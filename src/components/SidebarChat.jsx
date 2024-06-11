@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import ChatCard from "./ChatCard";
 import CardUserFound from "./CardUserFound";
+import SidebarNavigation from "./SidebarNavigation";
 
 const SidebarChat = ({ userLog }) => {
   const navigator = useNavigate();
@@ -15,9 +16,8 @@ const SidebarChat = ({ userLog }) => {
   const [userForChat, setUserForChat] = useState();
   const [loading, setLoading] = useState(true);
 
-  const { chatList, chatRequests, setChatRequests } = useChat();
-
-  const navigate = useNavigate();
+  const { chatList, chatRequests, nRequest, setChatRequests, setChatList } =
+    useChat();
 
   useEffect(() => {
     if (userFound === "") {
@@ -29,7 +29,7 @@ const SidebarChat = ({ userLog }) => {
     const loadRequest = () => {
       socket.on("ReceiveRequest", (data) => {
         const newRequest = {
-          id: data.id,
+          RequestId: data.id,
           avatar: data.avatar,
           name: data.name,
           lastname: data.lastname,
@@ -43,13 +43,26 @@ const SidebarChat = ({ userLog }) => {
         ) {
           return;
         }
-
         setChatRequests((prev) => [...prev, newRequest]);
         return;
       });
     };
     loadRequest();
   }, [socket]);
+
+  useEffect(() => {
+    const data = {
+      MyId: userLog.userInfo.id,
+    };
+    async function getChats() {
+      const res = await fetchDataPost("http://localhost:4040/api/chats", data);
+
+      if (res.status === 200) {
+        setChatList(res.data);
+      }
+    }
+    getChats();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,7 +119,7 @@ const SidebarChat = ({ userLog }) => {
   return (
     <div
       style={{
-        width: "20%",
+        width: "30%",
         borderRight: "1px solid gray",
         padding: "1rem",
         height: "90vh",
@@ -117,41 +130,7 @@ const SidebarChat = ({ userLog }) => {
     >
       <h2 style={{ fontSize: "15px" }}>Chats</h2>
 
-      <div
-        className="Options"
-        style={{
-          fontSize: "12px",
-          display: "flex",
-          gap: "1rem",
-          marginTop: "5px",
-        }}
-      >
-        <Link
-          style={{
-            textDecoration: "none",
-            color: "blue",
-          }}
-        >
-          Messages
-        </Link>
-        <Link
-          style={{
-            textDecoration: "none",
-            color: "grey",
-          }}
-        >
-          Solicitude
-        </Link>
-        <Link
-          to={"/ChatRequest"}
-          style={{
-            textDecoration: "none",
-            color: "grey",
-          }}
-        >
-          Request
-        </Link>
-      </div>
+      <SidebarNavigation focus={"Home"} nRequest={nRequest} />
 
       <form action="" style={{ marginTop: "5px" }} onSubmit={handleSubmit}>
         <div className="">
@@ -161,9 +140,7 @@ const SidebarChat = ({ userLog }) => {
               display: "flex",
               justifyContent: "end",
             }}
-          >
-            {/* <label htmlFor="userFound">Find user</label> */}
-          </div>
+          ></div>
           <input
             id="userFound"
             style={{
@@ -210,6 +187,7 @@ const SidebarChat = ({ userLog }) => {
         }}
         onClick={() => {
           localStorage.removeItem("token");
+          setChatRequests([]);
           navigator("/login");
         }}
       >

@@ -2,13 +2,14 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChatCard = ({ chats, chatId }) => {
-  const truncateMessage = (message, maxLength) => {
-    if (message.length > maxLength) {
-      return message.slice(0, maxLength) + "...";
-    }
-    return message;
-  };
+  // const truncateMessage = (message, maxLength) => {
+  //   if (message.length > maxLength) {
+  //     return message.slice(0, maxLength) + "...";
+  //   }
+  //   return message;
+  // };
 
+  console.log(chats);
   const navigator = useNavigate();
 
   return (
@@ -20,14 +21,16 @@ const ChatCard = ({ chats, chatId }) => {
       {chats.map((chat) => (
         <div
           className="chat-card"
-          key={chat.idx}
+          key={chat.chatId}
           style={{
-            background: chatId == chat.idx ? "#7fbaf2" : "white",
+            background: chatId == chat.ChatId ? "#7fbaf2" : "white",
             padding: ".4rem",
             borderRadius: "4px",
             cursor: "pointer",
           }}
-          onClick={() => navigator(`/chat/message/${chat.idx}`)}
+          onClick={() =>
+            navigator(`/chat/message/${chat.chatId}`, { state: chat })
+          }
         >
           <section
             className="chat"
@@ -49,21 +52,16 @@ const ChatCard = ({ chats, chatId }) => {
               alt=""
             />
             <article style={{ width: "100%" }}>
-              <h3 style={{ fontSize: "12px" }}>{chat.name}</h3>
+              <h3 style={{ fontSize: "12px" }}>
+                {chat.name} {chat.lastname}
+              </h3>
 
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                 }}
-              >
-                <p style={{ fontSize: "12px" }}>
-                  {truncateMessage(chat.message, 20)}
-                </p>
-                <span style={{ fontSize: "10px", color: "gray" }}>
-                  {chat.time}
-                </span>
-              </div>
+              ></div>
             </article>
           </section>
         </div>

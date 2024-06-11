@@ -40,3 +40,22 @@ export const fetchDataGet = async (route) => {
     return { error: err.message };
   }
 };
+
+export const fetchDataDelete = async (route) => {
+  try {
+    const response = await fetch(route, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+    if (response.status !== 200) {
+      return { error: result.message, status: response.status };
+    }
+    return { data: result, status: response.status };
+  } catch (err) {
+    return { error: err.message };
+  }
+};

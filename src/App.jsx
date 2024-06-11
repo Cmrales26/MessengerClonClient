@@ -23,7 +23,6 @@ function App() {
             <Route path="/" element={<Chat />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/message/:chatId" element={<Chat />} />
-            <Route path="/newChat/:userId" element={<Chat />} />
             <Route path="/ChatRequest" element={<Request />} />
           </Route>
         </Routes>

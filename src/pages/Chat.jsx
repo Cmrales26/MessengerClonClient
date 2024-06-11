@@ -2,15 +2,18 @@ import React, { useEffect, useState } from "react";
 import SidebarChat from "../components/SidebarChat";
 import { useNavigate, useParams } from "react-router-dom";
 import ChatRoom from "../components/ChatRoom";
-import { fetchDataGet } from "../utils/fetch";
+import { fetchDataGet, fetchDataPost } from "../utils/fetch";
 import TopBar from "../components/TopBar";
 import { socket } from "../utils/SocketConfig";
+import { useChat } from "../context/chatContex";
 
 const Chat = () => {
   const navigate = useNavigate();
+  const { setChatRequests } = useChat();
   const [userLog, setUserLog] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // Get User
   useEffect(() => {
     async function getUserToken() {
       let token = localStorage.getItem("token");
@@ -26,7 +29,25 @@ const Chat = () => {
       setLoading(false);
     }
     getUserToken();
-  }, [loading]);
+  }, [navigate]);
+
+  // Get Request
+  useEffect(() => {
+    if (loading === false && userLog.userInfo) {
+      let data = {
+        MyId: userLog.userInfo.id,
+      };
+      async function getMyRequest() {
+        const res = await fetchDataPost(
+          "http://localhost:4040/api/MyRequest",
+          data
+        );
+        setChatRequests(res.data);
+      }
+
+      getMyRequest();
+    }
+  }, [loading, userLog, setChatRequests]);
 
   if (loading) {
     return <h1>Loading...</h1>;
