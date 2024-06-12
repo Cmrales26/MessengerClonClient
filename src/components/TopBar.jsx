@@ -23,7 +23,7 @@ const TopBar = ({ userLog }) => {
           cursor: "pointer",
         }}
         onClick={() => {
-          navigate("/", 0);
+          window.location.href = "/";
         }}
       >
         <img

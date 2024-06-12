@@ -1,68 +1,81 @@
-import React, { useEffect, useState } from "react";
-import { fetchDataPost } from "../utils/fetch";
-import { useChat } from "../context/chatContex";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { socket } from "../utils/SocketConfig";
+import { useChat } from "../context/chatContex";
 
-const ChatRoom = ({ userLog }) => {
-  const { chatList, addChat } = useChat();
+const ChatRoom = ({ userLog, setSelectedChatId }) => {
   const [chat, setChat] = useState([]);
-  const [message, setMessage] = useState();
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [ChatInfoUser, setChatInfoUser] = useState();
   const CurrentUserLogId = userLog.userInfo.id;
   const navigate = useNavigate();
+  const chatEndRef = useRef(null);
 
   let { chatId } = useParams();
   let { state } = useLocation();
+  const { setChatList } = useChat();
 
   useEffect(() => {
     if (chatId !== undefined && state) {
       setChatInfoUser(state);
       setLoading(false);
+      setSelectedChatId(chatId);
+      socket.emit("JoinRoom", { chatId, CurrentUserLogId });
+
+      socket.on("JoinRoom", (data) => {
+        setChat([]);
+      });
+
+      socket.on("privateMessage", (data) => {
+        setChat((prev) => [...prev, data]);
+      });
+
+      setChatList((prevChatList) =>
+        prevChatList
+          .map((chat) =>
+            chat.chatId === chatId ? { ...chat, status: 0 } : chat
+          )
+          .sort((a, b) => b.status - a.status)
+      );
+
+      return () => {
+        socket.off("privateMessage");
+        socket.off("JoinRoom");
+      };
     } else {
       navigate("/");
     }
-  }, [ChatInfoUser, state]);
+  }, [chatId, state, CurrentUserLogId, navigate, setSelectedChatId]);
 
-  // if (chatId !== undefined) {
-  //   setLoading(false);
-  // }
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chat]);
 
-  // useEffect(() => {
-  //   const getInfoChat = async () => {
-  //     if (chatId) {
-  //       setChat(chatId);
-  //       setLoading(false);
-  //       return;
-  //     }
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
 
-  //     if (userId) {
-  //       setChat(userId);
-  //       let res = await fetchDataPost("http://localhost:4040/api/getUserId", {
-  //         userId: userId,
-  //       });
+    socket.emit("privateMessage", {
+      chatId,
+      message,
+      senderId: CurrentUserLogId,
+      TargetId: ChatInfoUser.id ?? ChatInfoUser.user1,
+      timestamp: new Date().toISOString(),
+    });
 
-  //       console.log(res.data);
+    setChatList((prevChatList) =>
+      prevChatList.map((chat) =>
+        chat.chatId === chatId ? { ...chat, status: 0 } : chat
+      )
+    );
 
-  //       setChatInfoUser(res.data);
-
-  //       setLoading(false);
-  //       return;
-  //     }
-  //   };
-  //   getInfoChat();
-  // }, [chatId, userId]);
-
-  // const SendToSocket = () => {
-  //   const targetUser = ChatInfoUser.data.id || null;
-  //   const senderId = CurrentUserLogId;
-  //   socket.emit("sendMessage", { message, targetUser, senderId });
-  // };
+    setMessage("");
+  };
 
   if (loading || ChatInfoUser === undefined) {
     return (
       <div
-        className=""
         style={{
           width: "80%",
           display: "flex",
@@ -77,12 +90,8 @@ const ChatRoom = ({ userLog }) => {
   }
 
   return (
-    <div
-      style={{
-        width: "80%",
-      }}
-    >
-      <div className="">
+    <div style={{ width: "80%" }}>
+      <div>
         <section
           style={{
             padding: ".7rem",
@@ -102,7 +111,6 @@ const ChatRoom = ({ userLog }) => {
               borderRadius: "100%",
             }}
           />
-
           <p>
             {ChatInfoUser.name} {ChatInfoUser.lastname}
           </p>
@@ -110,26 +118,63 @@ const ChatRoom = ({ userLog }) => {
 
         <section
           style={{
-            height: "65vh",
+            height: "67vh",
             minHeight: "65vh",
             overflow: "auto",
             padding: "1rem",
           }}
+          id="Chat"
         >
-          <h1>{chat}</h1>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {chat.map((messages, idx) => (
+              <p
+                style={{
+                  alignSelf: `${
+                    messages.senderId === CurrentUserLogId
+                      ? "flex-end"
+                      : "flex-start"
+                  }`,
+                  fontSize: "13px",
+                  margin: "1rem",
+                  padding: ".5rem 1rem",
+                  borderRadius: "10px",
+                  backgroundColor: `${
+                    messages.senderId === CurrentUserLogId ? "#cce6ff" : "#ccc"
+                  }`,
+                  maxWidth: "400px",
+                  wordWrap: "break-word",
+                  wordBreak: "break-all",
+                  boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.25)",
+                }}
+                key={idx}
+              >
+                {messages.message}
+              </p>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
         </section>
 
-        <section
+        <form
           style={{
             display: "flex",
             padding: "1rem",
             gap: "1rem",
             alignItems: "center",
           }}
+          onSubmit={sendMessage}
         >
           <input
+            id="InputMessage"
             type="text"
             placeholder="Type a message"
+            value={message}
             style={{
               width: "100%",
               height: "40px",
@@ -139,23 +184,37 @@ const ChatRoom = ({ userLog }) => {
               borderRadius: "4px",
               background: "#f0f0f0",
             }}
-            onChange={(e) => {
-              setMessage(e.target.value);
-            }}
+            onChange={(e) => setMessage(e.target.value)}
           />
           <button
             style={{
-              width: "50px",
-              height: "50px",
-              borderRadius: "100%",
+              width: "35px",
+              height: "35px",
+              borderRadius: "40%",
               border: "none",
               backgroundColor: "#0084ff",
+              cursor: "pointer",
             }}
-            // onClick={SendToSocket}
+            type="submit"
           >
-            {"Send"}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="icon icon-tabler icon-tabler-send"
+              width="20"
+              height="20"
+              viewBox="0 0 26 20"
+              strokeWidth="2"
+              stroke="#ffffff"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M10 14l11 -11" />
+              <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+            </svg>
           </button>
-        </section>
+        </form>
       </div>
     </div>
   );

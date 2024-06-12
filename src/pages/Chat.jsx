@@ -12,6 +12,7 @@ const Chat = () => {
   const { setChatRequests } = useChat();
   const [userLog, setUserLog] = useState({});
   const [loading, setLoading] = useState(true);
+  const [selectedChatId, setSelectedChatId] = useState(0);
 
   // Get User
   useEffect(() => {
@@ -67,8 +68,8 @@ const Chat = () => {
           display: "flex",
         }}
       >
-        <SidebarChat userLog={userLog} />
-        <ChatRoom userLog={userLog} />
+        <SidebarChat userLog={userLog} selectedChatId={selectedChatId} />
+        <ChatRoom userLog={userLog} setSelectedChatId={setSelectedChatId} />
       </section>
     </section>
   );

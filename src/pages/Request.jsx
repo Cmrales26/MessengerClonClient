@@ -32,7 +32,6 @@ const Request = () => {
 
   // Get Request
   useEffect(() => {
-    console.log("entre a request");
     if (loading === false && userLog.userInfo) {
       let data = {
         MyId: userLog.userInfo.id,

@@ -9,12 +9,13 @@ import ChatCard from "./ChatCard";
 import CardUserFound from "./CardUserFound";
 import SidebarNavigation from "./SidebarNavigation";
 
-const SidebarChat = ({ userLog }) => {
+const SidebarChat = ({ userLog, selectedChatId }) => {
   const navigator = useNavigate();
   const [userFound, setUserFound] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [userForChat, setUserForChat] = useState();
   const [loading, setLoading] = useState(true);
+  const [NewChatCard, setNewChatCard] = useState();
 
   const { chatList, chatRequests, nRequest, setChatRequests, setChatList } =
     useChat();
@@ -63,6 +64,54 @@ const SidebarChat = ({ userLog }) => {
     }
     getChats();
   }, []);
+
+  async function getUser(userId) {
+    try {
+      let res = await fetchDataPost("http://localhost:4040/api/getUserId", {
+        userId: userId,
+      });
+      return res.data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    socket.on("GetMessage", async (data) => {
+      setChatList((prevChatList) => {
+        const chatExists = prevChatList.some(
+          (chat) => chat.chatId === data.chatId
+        );
+        if (chatExists) {
+          return prevChatList
+            .map((chat) =>
+              chat.chatId === data.chatId ? { ...chat, status: 1 } : chat
+            )
+            .sort((a, b) => b.status - a.status);
+        } else {
+          let Id = data.senderId;
+          getUser(Id).then((res) => {
+            const newChat = {
+              chatId: data.chatId,
+              avatar: res.avatar,
+              name: res.data.name,
+              lastname: res.data.lastname,
+            };
+
+            setChatList((prev) =>
+              [...prev, newChat].sort((a, b) => a.status - b.status)
+            );
+          });
+        }
+
+        return prevChatList;
+      });
+    });
+
+    return () => {
+      socket.off("GetMessage");
+    };
+  }, [socket, setChatList]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,6 +165,8 @@ const SidebarChat = ({ userLog }) => {
     }
   };
 
+  const sortedChats = [...chatList].sort((a, b) => a.status - b.status);
+
   return (
     <div
       style={{
@@ -126,6 +177,7 @@ const SidebarChat = ({ userLog }) => {
         overflow: "auto",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       <h2 style={{ fontSize: "15px" }}>Chats</h2>
@@ -169,7 +221,14 @@ const SidebarChat = ({ userLog }) => {
           loading={loading}
         />
       ) : (
-        <ChatCard chats={[...chatList].reverse()} />
+        <div
+          className=""
+          style={{
+            overflow: "auto",
+          }}
+        >
+          <ChatCard chats={sortedChats.reverse()} chatId={selectedChatId} />
+        </div>
       )}
 
       <div style={{ flexGrow: 1 }} />

@@ -2,16 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChatCard = ({ chats, chatId }) => {
-  // const truncateMessage = (message, maxLength) => {
-  //   if (message.length > maxLength) {
-  //     return message.slice(0, maxLength) + "...";
-  //   }
-  //   return message;
-  // };
-
-  console.log(chats);
   const navigator = useNavigate();
-
   return (
     <div
       style={{
@@ -23,7 +14,7 @@ const ChatCard = ({ chats, chatId }) => {
           className="chat-card"
           key={chat.chatId}
           style={{
-            background: chatId == chat.ChatId ? "#7fbaf2" : "white",
+            background: chatId == chat.chatId ? "#7fbbf3" : "white",
             padding: ".4rem",
             borderRadius: "4px",
             cursor: "pointer",
@@ -51,7 +42,14 @@ const ChatCard = ({ chats, chatId }) => {
               }}
               alt=""
             />
-            <article style={{ width: "100%" }}>
+            <article
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <h3 style={{ fontSize: "12px" }}>
                 {chat.name} {chat.lastname}
               </h3>
@@ -61,7 +59,21 @@ const ChatCard = ({ chats, chatId }) => {
                   display: "flex",
                   justifyContent: "space-between",
                 }}
-              ></div>
+              >
+                {chat.status == "0" ? null : (
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "red",
+                      background: "red",
+                      borderRadius: "100%",
+                      marginRight: "15px",
+                    }}
+                  ></div>
+                )}
+                {/* {chat.status} */}
+              </div>
             </article>
           </section>
         </div>
