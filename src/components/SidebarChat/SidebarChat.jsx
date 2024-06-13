@@ -20,7 +20,7 @@ const SidebarChat = ({
   const [userForChat, setUserForChat] = useState();
   const [loading, setLoading] = useState(true);
 
-  const { chatList, setChatRequests, setChatList } = useChat();
+  const { chatList, setChatRequests, setChatList, client } = useChat();
 
   const receiveRequestListener = useRef(null);
   const getMessageListener = useRef(null);
@@ -51,7 +51,7 @@ const SidebarChat = ({
       MyId: userLog.userInfo.id,
     };
     async function getChats() {
-      const res = await fetchDataPost("http://localhost:4040/api/chats", data);
+      const res = await fetchDataPost(`${client}/api/chats`, data);
 
       if (res.status === 200) {
         setChatList(res.data);
@@ -64,7 +64,7 @@ const SidebarChat = ({
 
   async function getUser(userId) {
     try {
-      let res = await fetchDataPost("http://localhost:4040/api/getUserId", {
+      let res = await fetchDataPost(`${client}/api/getUserId`, {
         userId: userId,
       });
       return res.data;

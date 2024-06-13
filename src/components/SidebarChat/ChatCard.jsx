@@ -17,12 +17,7 @@ const ChatCard = ({ chats, chatId }) => {
           }
         >
           <section className="chat">
-            <img
-              src={chat.avatar}
-              width={45}
-              height={45}
-              alt="Profile Picture"
-            />
+            <img src={chat.avatar} alt="Profile Picture" />
             <article>
               <h3>
                 {chat.name} {chat.lastname}

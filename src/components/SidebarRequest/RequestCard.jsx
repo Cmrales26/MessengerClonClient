@@ -12,9 +12,8 @@ const RequestCard = ({ request, handleDecline, handleAccept }) => {
         <div className="Request-card" key={idx}>
           <section className="Request">
             <img
+              id="SenderAvatar"
               src={Request.avatar}
-              width={45}
-              height={45}
               alt="Request Profile Picture"
             />
 

@@ -80,7 +80,7 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
     return (
       <div
         style={{
-          width: "80%",
+          width: "100%",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",

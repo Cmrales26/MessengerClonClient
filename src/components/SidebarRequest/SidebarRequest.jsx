@@ -8,7 +8,8 @@ import { socket } from "../../utils/SocketConfig";
 
 const SideBarRequest = () => {
   const navigate = useNavigate();
-  const { chatRequests, nRequest, setNRequest, setChatRequests } = useChat();
+  const { chatRequests, nRequest, setNRequest, setChatRequests, client } =
+    useChat();
   const receiveRequestListener = useRef(null);
 
   useEffect(() => {
@@ -44,13 +45,13 @@ const SideBarRequest = () => {
 
     try {
       const res = await fetchDataPost(
-        "http://localhost:4040/api/AcceptChatRequest",
+        `${client}/api/AcceptChatRequest`,
         apiData
       );
 
       if (res.status === 200) {
         const resDelete = await fetchDataDelete(
-          `http://localhost:4040/api/DeleteChatRequest/${apiData.chatId}`
+          `${client}/api/DeleteChatRequest/${apiData.chatId}`
         );
 
         if (resDelete.status === 200) {
@@ -70,7 +71,7 @@ const SideBarRequest = () => {
       );
 
       const res = await fetchDataDelete(
-        `http://localhost:4040/api/DeleteChatRequest/${id}`
+        `${client}/api/DeleteChatRequest/${id}`
       );
 
       console.log(res.status);

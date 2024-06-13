@@ -9,7 +9,7 @@ import SideBarRequest from "../components/SidebarRequest/SidebarRequest";
 import Loader from "../components/Loader";
 
 const Request = () => {
-  const { setChatRequests } = useChat();
+  const { setChatRequests, client } = useChat();
 
   const [loading, setLoading] = useState(true);
   const [userLog, setUserLog] = useState({});
@@ -25,12 +25,12 @@ const Request = () => {
           return;
         }
         let response = await fetchDataGet(
-          `http://localhost:4040/api/validateToken/${token}`
+          `${client}/api/validateToken/${token}`
         );
         setUserLog(response);
       } catch (error) {
         console.error("Error fetching user token:", error);
-        navigate("/login"); // Manejar el error redirigiendo al usuario a la página de inicio de sesión
+        navigate("/login");
       } finally {
         setLoading(false);
       }
@@ -45,10 +45,7 @@ const Request = () => {
           const data = {
             MyId: userLog.userInfo.id,
           };
-          const res = await fetchDataPost(
-            "http://localhost:4040/api/MyRequest",
-            data
-          );
+          const res = await fetchDataPost(`${client}/api/MyRequest`, data);
           setChatRequests(res.data);
         } catch (error) {
           console.error("Error fetching user requests:", error);

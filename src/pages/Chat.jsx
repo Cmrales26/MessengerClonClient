@@ -16,7 +16,7 @@ const Chat = () => {
   const [areRequest, setAreRequest] = useState(false);
 
   const navigate = useNavigate();
-  const { setChatRequests } = useChat();
+  const { setChatRequests, client } = useChat();
 
   useEffect(() => {
     async function getUserToken() {
@@ -27,7 +27,7 @@ const Chat = () => {
           return;
         }
         let response = await fetchDataGet(
-          `http://localhost:4040/api/validateToken/${token}`
+          `${client}/api/validateToken/${token}`
         );
         setUserLog(response);
       } catch (error) {
@@ -47,10 +47,7 @@ const Chat = () => {
           const data = {
             MyId: userLog.userInfo.id,
           };
-          const res = await fetchDataPost(
-            "http://localhost:4040/api/MyRequest",
-            data
-          );
+          const res = await fetchDataPost(`${client}/api/MyRequest`, data);
           if (res.data) {
             setChatRequests(res.data);
             setAreRequest(true);

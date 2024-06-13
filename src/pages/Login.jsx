@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchDataPost } from "../utils/fetch";
 
 import MessengerIcon from "../assets/Messenger.svg";
+import { useChat } from "../context/chatContex";
 
 const Login = () => {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
   const [error, setError] = useState();
+  const { client } = useChat();
 
   const navigator = useNavigate();
 
@@ -25,10 +27,7 @@ const Login = () => {
         password: password,
       };
 
-      let res = await fetchDataPost(
-        "http://localhost:4040/api/loginUser",
-        data
-      );
+      let res = await fetchDataPost(`${client}/api/loginUser`, data);
 
       if (res.status !== 200) {
         setError(res.error);

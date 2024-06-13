@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchDataPost } from "../utils/fetch";
 import UploadIcon from "../assets/icons/Upload.svg";
+import { useChat } from "../context/chatContex";
 
 const Create = () => {
   const [name, setName] = useState();
@@ -12,6 +13,8 @@ const Create = () => {
   const [avatar, setAvatar] = useState("");
 
   const navigator = useNavigate();
+
+  const { client } = useChat();
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -38,10 +41,7 @@ const Create = () => {
         avatar: avatar,
       };
 
-      let res = await fetchDataPost(
-        "http://localhost:4040/api/createUser",
-        data
-      );
+      let res = await fetchDataPost(`${client}/api/createUser`, data);
 
       if (res.status !== 200) {
         setError(res.error);

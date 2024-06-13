@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { fetchDataPost } from "../../utils/fetch";
+import { useChat } from "../../context/chatContex";
 
 const SearchUser = ({
   setUserFound,
@@ -8,6 +9,7 @@ const SearchUser = ({
   setUserForChat,
   setLoading,
 }) => {
+  const { client } = useChat();
   useEffect(() => {
     if (userFound === "") {
       setIsSearch(false);
@@ -18,7 +20,7 @@ const SearchUser = ({
     e.preventDefault();
     setIsSearch(true);
 
-    let res = await fetchDataPost("http://localhost:4040/api/getUser", {
+    let res = await fetchDataPost(`${client}/api/getUser`, {
       username: userFound,
     });
 

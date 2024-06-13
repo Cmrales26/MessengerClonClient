@@ -1,8 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { fetchDataPost } from "../../utils/fetch";
 import { socket } from "../../utils/SocketConfig";
+import { useChat } from "../../context/chatContex";
 
 const CardUserFound = ({ user, loading, userLog, setUserFound }) => {
+  const { client } = useChat();
   const handelNewRequest = async () => {
     const today = new Date();
     const date = today.toISOString().split("T")[0];
@@ -17,10 +19,7 @@ const CardUserFound = ({ user, loading, userLog, setUserFound }) => {
       date: date,
     };
 
-    let res = await fetchDataPost(
-      "http://localhost:4040/api/chatRequest",
-      data
-    );
+    let res = await fetchDataPost(`${client}/api/chatRequest`, data);
 
     if (res.status === 208) {
       alert("You already send a chat request to this person.");
