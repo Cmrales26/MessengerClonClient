@@ -1,14 +1,13 @@
+import React from "react";
+import SidebarNavigation from "./SidebarNavigation";
+import RequestCard from "./RequestCard";
 import { useNavigate } from "react-router-dom";
+import { fetchDataDelete, fetchDataPost } from "../utils/fetch";
 import { useChat } from "../context/chatContex";
 
-import RequestCard from "./RequestCard";
-
-import SidebarNavigation from "./SidebarNavigation";
-import { fetchDataDelete, fetchDataPost } from "../utils/fetch";
-
 const SideBarRequest = () => {
-  const { chatRequests, nRequest, setNRequest, setChatRequests } = useChat();
   const navigate = useNavigate();
+  const { chatRequests, nRequest, setNRequest, setChatRequests } = useChat();
 
   const handleAccept = async (data) => {
     const apiData = {
@@ -26,36 +25,44 @@ const SideBarRequest = () => {
       lastname: data.lastname,
     };
 
-    const res = await fetchDataPost(
-      "http://localhost:4040/api/AcceptChatRequest",
-      apiData
-    );
-
-    if (res.status === 200) {
-      let resDelete = await fetchDataDelete(
-        `http://localhost:4040/api/DeleteChatRequest/${apiData.chatId}`
+    try {
+      const res = await fetchDataPost(
+        "http://localhost:4040/api/AcceptChatRequest",
+        apiData
       );
 
-      if (resDelete.status === 200) {
-        setNRequest((prev) => prev - 1);
-        navigate(`/chat/message/${dataChat.chatId}`, { state: dataChat });
+      if (res.status === 200) {
+        const resDelete = await fetchDataDelete(
+          `http://localhost:4040/api/DeleteChatRequest/${apiData.chatId}`
+        );
+
+        if (resDelete.status === 200) {
+          setNRequest((prev) => prev - 1);
+          navigate(`/chat/message/${dataChat.chatId}`, { state: dataChat });
+        }
       }
+    } catch (error) {
+      console.error("Error accepting chat request:", error);
+      // Aquí puedes manejar el error, por ejemplo, mostrando un mensaje al usuario
     }
   };
 
   const handleDecline = async (id) => {
-    const newChatRequests = chatRequests.filter(
-      (request) => request.RequestId !== id
-    );
+    try {
+      const newChatRequests = chatRequests.filter(
+        (request) => request.RequestId !== id
+      );
 
-    const res = await fetchDataDelete(
-      `http://localhost:4040/api/DeleteChatRequest/${id}`
-    );
+      const res = await fetchDataDelete(
+        `http://localhost:4040/api/DeleteChatRequest/${id}`
+      );
 
-    if (res.status === 200) {
-      setChatRequests(newChatRequests);
-      setNRequest((prev) => prev - 1);
-      return;
+      if (res.status === 200) {
+        setChatRequests(newChatRequests);
+        setNRequest((prev) => prev - 1);
+      }
+    } catch (error) {
+      console.error("Error declining chat request:", error);
     }
   };
 
@@ -75,16 +82,10 @@ const SideBarRequest = () => {
 
       <SidebarNavigation focus={"Request"} nRequest={nRequest} />
 
-      <h3
-        style={{
-          marginTop: "1rem",
-        }}
-      >
-        Chat Request
-      </h3>
+      <h3 style={{ marginTop: "1rem" }}>Chat Request</h3>
 
       <RequestCard
-        request={[...chatRequests].reverse()}
+        request={[...chatRequests].reverse()} // Reversing to show latest requests first
         handleDecline={handleDecline}
         handleAccept={handleAccept}
       />
@@ -110,6 +111,7 @@ const SideBarRequest = () => {
       >
         Log Out
       </button>
+
       <p
         style={{
           color: "gray",

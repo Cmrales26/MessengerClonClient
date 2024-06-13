@@ -1,74 +1,89 @@
-import React, { useEffect, useState } from "react";
-import SidebarChat from "../components/SidebarChat";
-import { useNavigate, useParams } from "react-router-dom";
-import ChatRoom from "../components/ChatRoom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchDataGet, fetchDataPost } from "../utils/fetch";
-import TopBar from "../components/TopBar";
 import { socket } from "../utils/SocketConfig";
 import { useChat } from "../context/chatContex";
 
+import SidebarChat from "../components/SidebarChat/SidebarChat";
+import ChatRoom from "../components/ChatRoom";
+import TopBar from "../components/TopBar";
+
 const Chat = () => {
-  const navigate = useNavigate();
-  const { setChatRequests } = useChat();
   const [userLog, setUserLog] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedChatId, setSelectedChatId] = useState(0);
+  const [areRequest, setAreRequest] = useState(false);
 
-  // Get User
+  const navigate = useNavigate();
+  const { setChatRequests } = useChat();
+
   useEffect(() => {
     async function getUserToken() {
-      let token = localStorage.getItem("token");
-      if (!token) {
+      try {
+        let token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+        let response = await fetchDataGet(
+          `http://localhost:4040/api/validateToken/${token}`
+        );
+        setUserLog(response);
+      } catch (error) {
+        console.error("Error fetching user token:", error);
         navigate("/login");
-        return;
+      } finally {
+        setLoading(false);
       }
-      let response = await fetchDataGet(
-        `http://localhost:4040/api/validateToken/${token}`
-      );
-
-      setUserLog(response);
-      setLoading(false);
     }
     getUserToken();
-  }, [navigate]);
+  }, [setUserLog]);
 
-  // Get Request
   useEffect(() => {
-    if (loading === false && userLog.userInfo) {
-      let data = {
-        MyId: userLog.userInfo.id,
-      };
-      async function getMyRequest() {
-        const res = await fetchDataPost(
-          "http://localhost:4040/api/MyRequest",
-          data
-        );
-        setChatRequests(res.data);
+    async function getMyRequest() {
+      try {
+        if (!loading && userLog.userInfo) {
+          const data = {
+            MyId: userLog.userInfo.id,
+          };
+          const res = await fetchDataPost(
+            "http://localhost:4040/api/MyRequest",
+            data
+          );
+          if (res.data) {
+            setChatRequests(res.data);
+            setAreRequest(true);
+          } else {
+            console.log("no hay request");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user requests:", error);
       }
-
-      getMyRequest();
     }
-  }, [loading, userLog, setChatRequests]);
+    getMyRequest();
+  }, [loading, userLog, setChatRequests, setAreRequest]);
+
+  useEffect(() => {
+    if (userLog.userInfo && userLog.userInfo.id) {
+      socket.emit("register", userLog.userInfo.id);
+    }
+  }, [userLog]);
 
   if (loading) {
-    return <h1>Loading...</h1>;
-  }
-
-  const userId = userLog.userInfo.id;
-
-  if (userId !== undefined) {
-    socket.emit("register", userId);
+    return <h1>Loading... CHAT</h1>;
   }
 
   return (
     <section>
       <TopBar userLog={userLog} />
-      <section
-        style={{
-          display: "flex",
-        }}
-      >
-        <SidebarChat userLog={userLog} selectedChatId={selectedChatId} />
+      <section style={{ display: "flex" }}>
+        <SidebarChat
+          userLog={userLog}
+          selectedChatId={selectedChatId}
+          setAreRequest={setAreRequest}
+          areRequest={areRequest}
+        />
         <ChatRoom userLog={userLog} setSelectedChatId={setSelectedChatId} />
       </section>
     </section>

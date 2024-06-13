@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const SidebarNavigation = ({ focus, nMessages, nSolicitude, nRequest }) => {
+const SidebarNavigation = ({ focus, areRequest }) => {
   return (
     <div
       className="Options"
@@ -36,21 +36,25 @@ const SidebarNavigation = ({ focus, nMessages, nSolicitude, nRequest }) => {
           color: `${focus === "Request" ? "blue" : "grey"}`,
         }}
       >
-        <div className="">
-          <p>
-            Request{" "}
-            <span
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <p>Request</p>
+          {areRequest ? (
+            <div
               style={{
+                width: "7px",
+                height: "7px",
                 backgroundColor: "red",
                 color: "white",
-                padding: "0rem .5rem",
                 borderRadius: "10px",
                 marginLeft: "5px",
               }}
-            >
-              {nRequest}
-            </span>
-          </p>
+            ></div>
+          ) : null}
         </div>
       </Link>
     </div>
