@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDataPost } from "../../utils/fetch";
 import { useChat } from "../../context/chatContex";
@@ -22,12 +22,28 @@ const SidebarChat = ({
 
   const { chatList, setChatRequests, setChatList } = useChat();
 
+  const receiveRequestListener = useRef(null);
+  const getMessageListener = useRef(null);
+
   const navigator = useNavigate();
 
+  // Charge the Notification when user get a new request
+
   useEffect(() => {
-    socket.on("ReceiveRequest", () => {
-      setAreRequest(true);
-    });
+    if (!receiveRequestListener.current) {
+      receiveRequestListener.current = () => {
+        // Change the status AreRequest to false to true bcz the user get a new request
+        setAreRequest(true);
+      };
+      socket.on("ReceiveRequest", receiveRequestListener.current);
+    }
+
+    return () => {
+      if (receiveRequestListener.current) {
+        socket.off("ReceiveRequest", receiveRequestListener.current);
+        receiveRequestListener.current = null;
+      }
+    };
   }, [socket, setAreRequest]);
 
   useEffect(() => {
@@ -44,6 +60,8 @@ const SidebarChat = ({
     getChats();
   }, [setChatList]);
 
+  //Found user info from db
+
   async function getUser(userId) {
     try {
       let res = await fetchDataPost("http://localhost:4040/api/getUserId", {
@@ -55,43 +73,59 @@ const SidebarChat = ({
     }
   }
 
+  // When the user get a new message change the Status to 1 in the chat
+  // if the chat does not exist create a new card in the target user
+
   useEffect(() => {
-    socket.on("GetMessage", async (data) => {
-      setChatList((prevChatList) => {
-        const chatExists = prevChatList.some(
-          (chat) => chat.chatId === data.chatId
-        );
-        if (chatExists) {
-          return prevChatList
-            .map((chat) =>
-              chat.chatId === data.chatId ? { ...chat, status: 1 } : chat
-            )
-            .sort((a, b) => b.status - a.status);
-        } else {
-          let Id = data.senderId;
-          getUser(Id).then((res) => {
-            const newChat = {
-              chatId: data.chatId,
-              avatar: res.avatar,
-              name: res.data.name,
-              lastname: res.data.lastname,
-            };
+    if (!getMessageListener.current) {
+      getMessageListener.current = async (data) => {
+        setChatList((prevChatList) => {
+          const chatExists = prevChatList.some(
+            (chat) => chat.chatId === data.chatId
+          );
 
-            setChatList((prev) =>
-              [...prev, newChat].sort((a, b) => a.status - b.status)
-            );
-          });
-        }
+          // If the chat Exist change the Status to 1
 
-        return prevChatList;
-      });
-    });
+          if (chatExists) {
+            return prevChatList
+              .map((chat) =>
+                chat.chatId === data.chatId ? { ...chat, status: 1 } : chat
+              )
+              .sort((a, b) => b.status - a.status);
+          } else {
+            // Create new Object in the chatList
+            let Id = data.senderId;
+            getUser(Id).then((res) => {
+              const newChat = {
+                chatId: data.chatId,
+                avatar: res.avatar,
+                name: res.data.name,
+                lastname: res.data.lastname,
+              };
+
+              setChatList((prev) =>
+                [...prev, newChat].sort((a, b) => a.status - b.status)
+              );
+            });
+          }
+
+          return prevChatList;
+        });
+      };
+
+      // Get the chat in the target id that have been gotten from the server
+      socket.on("GetMessage", getMessageListener.current);
+    }
 
     return () => {
-      socket.off("GetMessage");
+      if (getMessageListener.current) {
+        socket.off("GetMessage", getMessageListener.current);
+        getMessageListener.current = null;
+      }
     };
   }, [socket, setChatList]);
 
+  // Delete the token
   const handleLogout = () => {
     localStorage.removeItem("token");
     setChatRequests([]);

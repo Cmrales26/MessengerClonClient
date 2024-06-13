@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import MessengerIcon from "../assets/Messenger.svg";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchDataPost } from "../utils/fetch";
+import UploadIcon from "../assets/icons/Upload.svg";
 
 const Create = () => {
   const [name, setName] = useState();
@@ -60,51 +60,20 @@ const Create = () => {
   };
 
   return (
-    <section
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
+    <section id="Create">
       <section
         className="Login Form"
         style={{
           width: "25%",
         }}
       >
-        <figure
-          style={{
-            gap: 20,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            marginBottom: "2rem",
-          }}
-        >
+        <figure>
           <img
             src={avatar ? `data:image/png;base64,${avatar}` : null}
             alt="Messenger Icon"
-            style={{
-              width: "200px",
-              height: "200px",
-              borderRadius: "100%",
-              objectFit: "contain",
-            }}
           />
 
-          <label
-            style={{
-              border: "1px solid #ccc",
-              display: "inline-block",
-              padding: "6px 12px",
-              cursor: "pointer",
-              fontSize: "12px",
-            }}
-          >
+          <label>
             <input
               type="file"
               accept=".jpg, .png, .webp"
@@ -113,40 +82,18 @@ const Create = () => {
                 display: "none",
               }}
             />
-            Upload Profile Photo
+            <div>
+              <p>Upload Profile Photo</p>
+              <img src={UploadIcon} alt="UploadIcon" />
+            </div>
           </label>
 
           <p style={{ fontSize: "20px" }}>Create An Account</p>
         </figure>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
-          <div
-            className=""
-            style={{
-              width: "100%",
-              display: "flex",
-              gap: 20,
-            }}
-          >
+        <form onSubmit={handleSubmit}>
+          <div className="name-last">
             <input
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "5px",
-                color: "black",
-                letterSpacing: "1px",
-                cursor: "pointer",
-                border: "grey solid 1px",
-                fontSize: "12px",
-              }}
               type="text"
               onChange={(value) => {
                 setName(value.target.value);
@@ -154,16 +101,6 @@ const Create = () => {
               placeholder="Name"
             />
             <input
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "5px",
-                color: "black",
-                letterSpacing: "1px",
-                cursor: "pointer",
-                border: "grey solid 1px",
-                fontSize: "12px",
-              }}
               type="text"
               onChange={(value) => {
                 setLastName(value.target.value);
@@ -172,16 +109,6 @@ const Create = () => {
             />
           </div>
           <input
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              color: "black",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              border: "grey solid 1px",
-              fontSize: "12px",
-            }}
             type="text"
             onChange={(value) => {
               setUsername(value.target.value);
@@ -189,16 +116,6 @@ const Create = () => {
             placeholder="Username"
           />
           <input
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              color: "black",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              border: "grey solid 1px",
-              fontSize: "12px",
-            }}
             type="password"
             onChange={(value) => {
               setPassword(value.target.value);
@@ -206,34 +123,9 @@ const Create = () => {
             placeholder="Password"
           />
 
-          <Link
-            to={"/login"}
-            style={{
-              width: "100%",
-              textAlign: "end",
-              textDecoration: "none",
-              color: "gray",
-              fontSize: "12px",
-            }}
-          >
-            Login
-          </Link>
+          <Link to={"/login"}>Login</Link>
 
-          <button
-            style={{
-              width: "60%",
-              padding: "5px",
-              borderRadius: "5px",
-              outline: "none",
-              color: "white",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              backgroundColor: "#1877F2",
-              border: "none",
-              fontSize: "12px",
-            }}
-            type="submit"
-          >
+          <button id="ActionAuthBtn" type="submit">
             Continue
           </button>
           {error}

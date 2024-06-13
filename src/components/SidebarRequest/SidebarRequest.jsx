@@ -1,13 +1,30 @@
-import React from "react";
-import SidebarNavigation from "./SidebarNavigation";
+import React, { useEffect, useRef } from "react";
+import SidebarNavigation from "../SidebarNavigation";
 import RequestCard from "./RequestCard";
 import { useNavigate } from "react-router-dom";
-import { fetchDataDelete, fetchDataPost } from "../utils/fetch";
-import { useChat } from "../context/chatContex";
+import { fetchDataDelete, fetchDataPost } from "../../utils/fetch";
+import { useChat } from "../../context/chatContex";
+import { socket } from "../../utils/SocketConfig";
 
 const SideBarRequest = () => {
   const navigate = useNavigate();
   const { chatRequests, nRequest, setNRequest, setChatRequests } = useChat();
+  const receiveRequestListener = useRef(null);
+
+  useEffect(() => {
+    if (!receiveRequestListener.current) {
+      receiveRequestListener.current = async (data) => {
+        setChatRequests((prev) => [...prev, data]);
+      };
+      socket.on("ReceiveRequest", receiveRequestListener.current);
+    }
+    return () => {
+      if (receiveRequestListener.current) {
+        socket.off("ReceiveRequest", receiveRequestListener.current);
+        receiveRequestListener.current = null;
+      }
+    };
+  }, [socket]);
 
   const handleAccept = async (data) => {
     const apiData = {
@@ -43,7 +60,6 @@ const SideBarRequest = () => {
       }
     } catch (error) {
       console.error("Error accepting chat request:", error);
-      // Aquí puedes manejar el error, por ejemplo, mostrando un mensaje al usuario
     }
   };
 
@@ -57,6 +73,8 @@ const SideBarRequest = () => {
         `http://localhost:4040/api/DeleteChatRequest/${id}`
       );
 
+      console.log(res.status);
+
       if (res.status === 200) {
         setChatRequests(newChatRequests);
         setNRequest((prev) => prev - 1);
@@ -67,25 +85,12 @@ const SideBarRequest = () => {
   };
 
   return (
-    <div
-      style={{
-        width: "30%",
-        borderRight: "1px solid gray",
-        padding: "1rem",
-        height: "90vh",
-        overflow: "auto",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <h2 style={{ fontSize: "15px" }}>Chats</h2>
-
+    <div id="RequestSidebar">
+      <h2>Chat Request</h2>
       <SidebarNavigation focus={"Request"} nRequest={nRequest} />
 
-      <h3 style={{ marginTop: "1rem" }}>Chat Request</h3>
-
       <RequestCard
-        request={[...chatRequests].reverse()} // Reversing to show latest requests first
+        request={[...chatRequests].reverse()}
         handleDecline={handleDecline}
         handleAccept={handleAccept}
       />
@@ -93,16 +98,7 @@ const SideBarRequest = () => {
       <div style={{ flexGrow: 1 }} />
 
       <button
-        style={{
-          width: "100%",
-          border: "none",
-          color: "red",
-          padding: ".5rem .3rem",
-          cursor: "pointer",
-          borderRadius: "4px",
-          textDecoration: "none",
-          transition: "all 0.3s ease",
-        }}
+        id="LogOut"
         onClick={() => {
           localStorage.removeItem("token");
           setChatRequests([]);
@@ -111,13 +107,6 @@ const SideBarRequest = () => {
       >
         Log Out
       </button>
-
-      <p
-        style={{
-          color: "gray",
-          marginTop: "10px",
-        }}
-      ></p>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { useChat } from "../context/chatContex";
 import SidebarChat from "../components/SidebarChat/SidebarChat";
 import ChatRoom from "../components/ChatRoom";
 import TopBar from "../components/TopBar";
+import Loader from "../components/Loader";
 
 const Chat = () => {
   const [userLog, setUserLog] = useState({});
@@ -71,7 +72,7 @@ const Chat = () => {
   }, [userLog]);
 
   if (loading) {
-    return <h1>Loading... CHAT</h1>;
+    return <Loader message={"Loading Chats"} redirect={"/"} />;
   }
 
   return (

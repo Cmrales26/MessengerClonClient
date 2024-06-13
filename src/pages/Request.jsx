@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from "react";
-import TopBar from "../components/TopBar";
-import SideBarRequest from "../components/SidebarRequest";
+import { useEffect, useState } from "react";
 import { fetchDataGet, fetchDataPost } from "../utils/fetch";
 import { socket } from "../utils/SocketConfig";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "../context/chatContex";
 
+import TopBar from "../components/TopBar";
+import SideBarRequest from "../components/SidebarRequest/SidebarRequest";
+import Loader from "../components/Loader";
+
 const Request = () => {
-  const navigate = useNavigate();
   const { setChatRequests } = useChat();
 
   const [loading, setLoading] = useState(true);
   const [userLog, setUserLog] = useState({});
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getUserToken() {
@@ -64,7 +67,7 @@ const Request = () => {
   }, [userLog]);
 
   if (loading) {
-    return <h1>Loading... Request</h1>;
+    return <Loader message={"Loading Request"} redirect={"/ChatRequest"} />;
   }
 
   return (

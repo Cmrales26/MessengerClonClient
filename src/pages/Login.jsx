@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import MessengerIcon from "../assets/Messenger.svg";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchDataPost } from "../utils/fetch";
+
+import MessengerIcon from "../assets/Messenger.svg";
 
 const Login = () => {
   const [username, setUsername] = useState();
@@ -46,51 +47,15 @@ const Login = () => {
     }
   };
   return (
-    <section
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        flexDirection: "column",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
-      <section className="Login Form">
-        <figure
-          style={{
-            gap: 50,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            marginBottom: "2rem",
-          }}
-        >
+    <section id="Login">
+      <section className="Login_Form">
+        <figure>
           <img src={MessengerIcon} alt="Messenger Icon" />
-          <p style={{ fontSize: "20px" }}>Connect with your favorite people.</p>
+          <h1>Connect with your favorite people.</h1>
         </figure>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <input
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              color: "black",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              border: "grey solid 1px",
-              fontSize: "12px",
-            }}
             type="text"
             onChange={(value) => {
               setUsername(value.target.value);
@@ -98,16 +63,6 @@ const Login = () => {
             placeholder="Username"
           />
           <input
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              color: "black",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              border: "grey solid 1px",
-              fontSize: "12px",
-            }}
             type="password"
             onChange={(value) => {
               setPassword(value.target.value);
@@ -115,34 +70,9 @@ const Login = () => {
             placeholder="Password"
           />
 
-          <Link
-            to={"/create"}
-            style={{
-              width: "100%",
-              textAlign: "end",
-              textDecoration: "none",
-              color: "gray",
-              fontSize: "12px",
-            }}
-          >
-            Create Account
-          </Link>
+          <Link to={"/create"}>Create Account</Link>
 
-          <button
-            style={{
-              width: "60%",
-              padding: "8px",
-              borderRadius: "5px",
-              outline: "none",
-              color: "white",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              backgroundColor: "#1877F2",
-              border: "none",
-              fontSize: "12px",
-            }}
-            type="submit"
-          >
+          <button id="ActionAuthBtn" style={{}} type="submit">
             Continue
           </button>
           {error}

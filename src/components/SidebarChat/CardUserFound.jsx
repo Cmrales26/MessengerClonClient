@@ -8,7 +8,7 @@ const CardUserFound = ({ user, loading, userLog, setUserFound }) => {
     const date = today.toISOString().split("T")[0];
 
     const data = {
-      id: uuidv4(),
+      RequestId: uuidv4(),
       SenderId: userLog.userInfo.id,
       TargetId: user.data.id,
       name: userLog.userInfo.name,

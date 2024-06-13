@@ -1,39 +1,44 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import ChatIcon from "../assets/icons/Chat.svg";
+import Solicitude from "../assets/icons/Solicitude.svg";
+import Request from "../assets/icons/Request.svg";
 
 const SidebarNavigation = ({ focus, areRequest }) => {
+  const handleNavigation = (path) => {
+    window.location.href = path;
+  };
+
   return (
-    <div
-      className="Options"
-      style={{
-        fontSize: "12px",
-        display: "flex",
-        gap: "1rem",
-        marginTop: "5px",
-      }}
-    >
-      <Link
-        to={"/"}
+    <div className="Options">
+      <div
+        onClick={() => handleNavigation("/")}
         style={{
-          textDecoration: "none",
           color: `${focus === "Home" ? "blue" : "grey"}`,
+          cursor: "pointer",
         }}
+        className="SidebarItem"
       >
-        Messages
-      </Link>
-      <Link
+        <img src={ChatIcon} width={30} alt="Chat Icon" />
+        <p>Messages</p>
+      </div>
+
+      <div
+        onClick={() => handleNavigation("/")}
         style={{
-          textDecoration: "none",
           color: `${focus === "Solicitude" ? "blue" : "grey"}`,
+          cursor: "pointer",
         }}
+        className="SidebarItem"
       >
-        Solicitude
-      </Link>
-      <Link
-        to={"/ChatRequest"}
+        <img src={Solicitude} width={30} alt="Solicitude Icon" />
+        <p>Solicitude</p>
+      </div>
+
+      <div
+        onClick={() => handleNavigation("/ChatRequest")}
         style={{
-          textDecoration: "none",
           color: `${focus === "Request" ? "blue" : "grey"}`,
+          cursor: "pointer",
         }}
       >
         <div
@@ -42,21 +47,13 @@ const SidebarNavigation = ({ focus, areRequest }) => {
             alignItems: "center",
           }}
         >
-          <p>Request</p>
-          {areRequest ? (
-            <div
-              style={{
-                width: "7px",
-                height: "7px",
-                backgroundColor: "red",
-                color: "white",
-                borderRadius: "10px",
-                marginLeft: "5px",
-              }}
-            ></div>
-          ) : null}
+          <div className="RequestIconText">
+            <img src={Request} width={30} alt="Request Icon" />
+            <p>Request</p>
+          </div>
+          {areRequest ? <div className="areRequest"></div> : null}
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

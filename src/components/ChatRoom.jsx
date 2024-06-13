@@ -1,20 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { socket } from "../utils/SocketConfig";
 import { useChat } from "../context/chatContex";
+
+import SendMessageIcon from "../assets/icons/SendMessage.svg";
 
 const ChatRoom = ({ userLog, setSelectedChatId }) => {
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [ChatInfoUser, setChatInfoUser] = useState();
-  const CurrentUserLogId = userLog.userInfo.id;
+
   const navigate = useNavigate();
   const chatEndRef = useRef(null);
-
   let { chatId } = useParams();
   let { state } = useLocation();
   const { setChatList } = useChat();
+
+  const CurrentUserLogId = userLog.userInfo.id;
 
   useEffect(() => {
     if (chatId !== undefined && state) {
@@ -90,67 +93,29 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
   }
 
   return (
-    <div style={{ width: "80%" }}>
+    <div id="ChatRoom">
       <div>
-        <section
-          style={{
-            padding: ".7rem",
-            display: "flex",
-            gap: "1rem",
-            alignItems: "center",
-            boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.25)",
-          }}
-          id="Chat-app-bar"
-        >
-          <img
-            src={ChatInfoUser.avatar}
-            alt="Profile photo"
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "100%",
-            }}
-          />
+        <section id="Chat-app-bar">
+          <img src={ChatInfoUser.avatar} alt="Profile photo" />
           <p>
             {ChatInfoUser.name} {ChatInfoUser.lastname}
           </p>
         </section>
 
-        <section
-          style={{
-            height: "67vh",
-            minHeight: "65vh",
-            overflow: "auto",
-            padding: "1rem",
-          }}
-          id="Chat"
-        >
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+        <section id="Chat">
+          <div id="ChatContent">
             {chat.map((messages, idx) => (
               <p
+                id="Message"
                 style={{
                   alignSelf: `${
                     messages.senderId === CurrentUserLogId
                       ? "flex-end"
                       : "flex-start"
                   }`,
-                  fontSize: "13px",
-                  margin: "1rem",
-                  padding: ".5rem 1rem",
-                  borderRadius: "10px",
                   backgroundColor: `${
                     messages.senderId === CurrentUserLogId ? "#cce6ff" : "#ccc"
                   }`,
-                  maxWidth: "400px",
-                  wordWrap: "break-word",
-                  wordBreak: "break-all",
-                  boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.25)",
                 }}
                 key={idx}
               >
@@ -161,58 +126,16 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
           </div>
         </section>
 
-        <form
-          style={{
-            display: "flex",
-            padding: "1rem",
-            gap: "1rem",
-            alignItems: "center",
-          }}
-          onSubmit={sendMessage}
-        >
+        <form onSubmit={sendMessage}>
           <input
             id="InputMessage"
             type="text"
             placeholder="Type a message"
             value={message}
-            style={{
-              width: "100%",
-              height: "40px",
-              padding: "1rem",
-              border: "none",
-              outline: "none",
-              borderRadius: "4px",
-              background: "#f0f0f0",
-            }}
             onChange={(e) => setMessage(e.target.value)}
           />
-          <button
-            style={{
-              width: "35px",
-              height: "35px",
-              borderRadius: "40%",
-              border: "none",
-              backgroundColor: "#0084ff",
-              cursor: "pointer",
-            }}
-            type="submit"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="icon icon-tabler icon-tabler-send"
-              width="20"
-              height="20"
-              viewBox="0 0 26 20"
-              strokeWidth="2"
-              stroke="#ffffff"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M10 14l11 -11" />
-              <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
-            </svg>
+          <button type="submit">
+            <img src={SendMessageIcon} alt="" />
           </button>
         </form>
       </div>
