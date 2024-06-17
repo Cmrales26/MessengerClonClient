@@ -7,6 +7,7 @@ import { useChat } from "../context/chatContex";
 import TopBar from "../components/TopBar";
 import SideBarRequest from "../components/SidebarRequest/SidebarRequest";
 import Loader from "../components/Loader";
+import ChatRoom from "../components/ChatRoom";
 
 const Request = () => {
   const { setChatRequests, client } = useChat();
@@ -72,6 +73,11 @@ const Request = () => {
       <TopBar userLog={userLog} />
       <section style={{ display: "flex" }}>
         <SideBarRequest Request={true} userLog={userLog} />
+        <div
+          style={{
+            width: "100%",
+          }}
+        ></div>
       </section>
     </section>
   );

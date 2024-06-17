@@ -20,7 +20,7 @@ const SidebarChat = ({
   const [userForChat, setUserForChat] = useState();
   const [loading, setLoading] = useState(true);
 
-  const { chatList, setChatRequests, setChatList, client } = useChat();
+  const { chatList, setChatList, client } = useChat();
 
   const receiveRequestListener = useRef(null);
   const getMessageListener = useRef(null);
@@ -97,6 +97,7 @@ const SidebarChat = ({
             let Id = data.senderId;
             getUser(Id).then((res) => {
               const newChat = {
+                id: Id,
                 chatId: data.chatId,
                 avatar: res.avatar,
                 name: res.data.name,
@@ -126,11 +127,7 @@ const SidebarChat = ({
   }, [socket, setChatList]);
 
   // Delete the token
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setChatRequests([]);
-    navigator("/login");
-  };
+  const handleLogout = () => {};
 
   const sortedChats = [...chatList].sort((a, b) => a.status - b.status);
 
@@ -160,12 +157,6 @@ const SidebarChat = ({
           <ChatCard chats={sortedChats.reverse()} chatId={selectedChatId} />
         </div>
       )}
-
-      <div style={{ flexGrow: 1 }} />
-
-      <button id="LogOut" onClick={() => handleLogout()}>
-        Log Out
-      </button>
     </div>
   );
 };

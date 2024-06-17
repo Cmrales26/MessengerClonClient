@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { socket } from "../utils/SocketConfig";
 import { useChat } from "../context/chatContex";
+import { fetchDataGet, fetchDataPost } from "../utils/fetch";
+import { MenuComponent } from "./Menu";
 
 import SendMessageIcon from "../assets/icons/SendMessage.svg";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const ChatRoom = ({ userLog, setSelectedChatId }) => {
   const [chat, setChat] = useState([]);
@@ -15,9 +18,14 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
   const chatEndRef = useRef(null);
   let { chatId } = useParams();
   let { state } = useLocation();
-  const { setChatList } = useChat();
+  const { setChatList, client } = useChat();
 
   const CurrentUserLogId = userLog.userInfo.id;
+
+  const getMessages = async (PChatId) => {
+    const res = await fetchDataGet(`${client}/api/GetMessage/${PChatId}`);
+    return res;
+  };
 
   useEffect(() => {
     if (chatId !== undefined && state) {
@@ -26,8 +34,10 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
       setSelectedChatId(chatId);
       socket.emit("JoinRoom", { chatId, CurrentUserLogId });
 
-      socket.on("JoinRoom", (data) => {
+      socket.on("JoinRoom", async () => {
+        let res = await getMessages(chatId);
         setChat([]);
+        setChat(res);
       });
 
       socket.on("privateMessage", (data) => {
@@ -52,20 +62,32 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
   }, [chatId, state, CurrentUserLogId, navigate, setSelectedChatId]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    chatEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
   }, [chat]);
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    socket.emit("privateMessage", {
+    const MessageData = {
       chatId,
       message,
       senderId: CurrentUserLogId,
       TargetId: ChatInfoUser.id ?? ChatInfoUser.user1,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    const res = await fetchDataPost(`${client}/api/SetMessage`, MessageData);
+
+    if (res.status !== 200) {
+      return;
+    }
+
+    socket.emit("privateMessage", MessageData);
 
     setChatList((prevChatList) =>
       prevChatList.map((chat) =>
@@ -76,6 +98,13 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
     setMessage("");
   };
 
+  const Delete = () => {
+    console.log("Delete");
+  };
+  const ClearChat = () => {
+    console.log("Clear");
+  };
+
   if (loading || ChatInfoUser === undefined) {
     return (
       <div
@@ -84,7 +113,7 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100vh",
+          height: "85vh",
         }}
       >
         <h1>Welcome</h1>
@@ -96,10 +125,21 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
     <div id="ChatRoom">
       <div>
         <section id="Chat-app-bar">
-          <img src={ChatInfoUser.avatar} alt="Profile photo" />
-          <p>
-            {ChatInfoUser.name} {ChatInfoUser.lastname}
-          </p>
+          <div className="UserChatInfo">
+            <img src={ChatInfoUser.avatar} alt="Profile photo" />
+            <p>
+              {ChatInfoUser.name} {ChatInfoUser.lastname}
+            </p>
+          </div>
+          <div className="Menu">
+            <MenuComponent
+              options={[
+                { option: "Delete Chat", method: Delete },
+                { option: "Clear Chat", method: ClearChat },
+              ]}
+              icon={<MoreVertIcon />}
+            />
+          </div>
         </section>
 
         <section id="Chat">
@@ -122,8 +162,8 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
                 {messages.message}
               </p>
             ))}
-            <div ref={chatEndRef} />
           </div>
+          <div ref={chatEndRef} />
         </section>
 
         <form onSubmit={sendMessage}>

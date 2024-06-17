@@ -95,19 +95,6 @@ const SideBarRequest = () => {
         handleDecline={handleDecline}
         handleAccept={handleAccept}
       />
-
-      <div style={{ flexGrow: 1 }} />
-
-      <button
-        id="LogOut"
-        onClick={() => {
-          localStorage.removeItem("token");
-          setChatRequests([]);
-          navigate("/login");
-        }}
-      >
-        Log Out
-      </button>
     </div>
   );
 };
