@@ -15,6 +15,8 @@ const Chat = () => {
   const [selectedChatId, setSelectedChatId] = useState(0);
   const [areRequest, setAreRequest] = useState(false);
 
+  const [isInChat, setIsInChat] = useState(false);
+
   const navigate = useNavigate();
   const { setChatRequests, client } = useChat();
 
@@ -75,14 +77,20 @@ const Chat = () => {
   return (
     <section>
       <TopBar userLog={userLog} />
-      <section style={{ display: "flex" }}>
+      <section id="Home" style={{ display: "flex" }}>
         <SidebarChat
           userLog={userLog}
           selectedChatId={selectedChatId}
           setAreRequest={setAreRequest}
           areRequest={areRequest}
+          setIsInChat={setIsInChat}
+          isInChat={isInChat}
         />
-        <ChatRoom userLog={userLog} setSelectedChatId={setSelectedChatId} />
+        <ChatRoom
+          userLog={userLog}
+          setSelectedChatId={setSelectedChatId}
+          setIsInChat={setIsInChat}
+        />
       </section>
     </section>
   );

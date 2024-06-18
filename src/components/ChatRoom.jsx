@@ -4,11 +4,13 @@ import { socket } from "../utils/SocketConfig";
 import { useChat } from "../context/chatContex";
 import { fetchDataDelete, fetchDataGet, fetchDataPost } from "../utils/fetch";
 import { MenuComponent } from "./Menu";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import SendMessageIcon from "../assets/icons/SendMessage.svg";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { IconButton } from "@mui/material";
 
-const ChatRoom = ({ userLog, setSelectedChatId }) => {
+const ChatRoom = ({ userLog, setSelectedChatId, setIsInChat }) => {
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -127,6 +129,7 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
 
     setChatList(NewChatList);
     setLoading(true);
+    setIsInChat(false);
     navigate("/");
     socket.emit("deleteChat", {
       chatId,
@@ -145,11 +148,18 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
     });
 
     setChat([]);
+    setIsInChat(false);
+  };
+
+  const goBackHandle = () => {
+    setIsInChat(false);
+    navigate("/")
   };
 
   if (loading || ChatInfoUser === undefined) {
     return (
       <div
+        className={ChatInfoUser === undefined ? "NoChatRoom" : null}
         style={{
           width: "100%",
           display: "flex",
@@ -164,10 +174,13 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
   }
 
   return (
-    <div id="ChatRoom">
+    <div className={chatId === undefined ? "NoChatRoom" : null} id="ChatRoom">
       <div>
         <section id="Chat-app-bar">
           <div className="UserChatInfo">
+            <IconButton onClick={() => goBackHandle()}>
+              <ArrowBackIcon />
+            </IconButton>
             <img src={ChatInfoUser.avatar} alt="Profile photo" />
             <p>
               {ChatInfoUser.name} {ChatInfoUser.lastname}

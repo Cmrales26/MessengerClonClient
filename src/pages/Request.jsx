@@ -71,7 +71,7 @@ const Request = () => {
   return (
     <section>
       <TopBar userLog={userLog} />
-      <section style={{ display: "flex" }}>
+      <section id="Requests" style={{ display: "flex" }}>
         <SideBarRequest Request={true} userLog={userLog} />
         <div
           style={{

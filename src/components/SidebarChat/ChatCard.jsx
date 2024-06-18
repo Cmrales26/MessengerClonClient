@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const ChatCard = ({ chats, chatId }) => {
+const ChatCard = ({ chats, chatId, setIsInChat }) => {
   const navigator = useNavigate();
   return (
     <div>
@@ -12,9 +12,10 @@ const ChatCard = ({ chats, chatId }) => {
           style={{
             background: chatId == chat.chatId ? "#7fbbf3" : "white",
           }}
-          onClick={() =>
-            navigator(`/chat/message/${chat.chatId}`, { state: chat })
-          }
+          onClick={() => {
+            setIsInChat(true);
+            navigator(`/chat/message/${chat.chatId}`, { state: chat });
+          }}
         >
           <section className="chat">
             <img src={chat.avatar} alt="Profile Picture" />

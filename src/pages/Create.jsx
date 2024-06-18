@@ -61,12 +61,7 @@ const Create = () => {
 
   return (
     <section id="Create">
-      <section
-        className="Login Form"
-        style={{
-          width: "25%",
-        }}
-      >
+      <section>
         <figure>
           <img
             src={avatar ? `data:image/png;base64,${avatar}` : null}

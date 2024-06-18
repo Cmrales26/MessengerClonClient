@@ -41,6 +41,7 @@ body {
   flex-direction: column;
   align-items: center;
   height: 100vh;
+  padding: 1rem;
   figure {
     gap: 50px;
     display: flex;
@@ -76,6 +77,8 @@ body {
 }
 
 #Create {
+  margin: 1rem;
+  overflow: auto;
   figure {
     gap: 20px;
     display: flex;
@@ -85,8 +88,8 @@ body {
     width: 100%;
     margin-bottom: 2rem;
     img {
-      width: 200px;
-      height: 200px;
+      width: 150px;
+      height: 150px;
       border-radius: 100%;
       object-fit: cover;
     }
@@ -346,6 +349,7 @@ body {
   overflow: auto;
   display: flex;
   flex-direction: column;
+
   h2 {
     margin-bottom: 0.5rem;
   }
@@ -458,5 +462,80 @@ body {
       background-color: #0084ff;
       cursor: pointer;
     }
+  }
+}
+
+/* Responsive Design */
+
+/* Login */
+@media screen and (max-width: 1024px) {
+  #Chat {
+    min-height: 60vh !important;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  #SidebarChat,
+  #RequestSidebar {
+    .Options {
+      p {
+        display: none;
+      }
+    }
+  }
+  #Create {
+    figure {
+      img {
+        width: 150px;
+        height: 150px;
+        border-radius: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+  #Home {
+    flex-direction: column !important;
+    #SidebarChat {
+      width: 100%;
+    }
+  }
+  #Requests {
+    flex-direction: column !important;
+    #RequestSidebar {
+      width: 100%;
+    }
+  }
+
+  .NoChatRoom {
+    display: none !important;
+  }
+  .IsInChat {
+    display: none !important;
+  }
+  .IsHome {
+    display: fle !important;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  #TopBar {
+    padding: 1rem !important;
+    .LeftSide {
+      img {
+        display: none;
+      }
+    }
+    .RightSide {
+      p {
+        display: none;
+      }
+    }
+  }
+  #Chat {
+    min-height: 63vh !important;
+    max-height: 63vh !important;
+  }
+  #Chat-app-bar {
+    padding: 0.7rem 0rem !important;
   }
 }

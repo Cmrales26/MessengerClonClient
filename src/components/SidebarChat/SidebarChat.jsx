@@ -14,6 +14,8 @@ const SidebarChat = ({
   selectedChatId,
   setAreRequest,
   areRequest,
+  setIsInChat,
+  isInChat,
 }) => {
   const [userFound, setUserFound] = useState("");
   const [isSearch, setIsSearch] = useState(false);
@@ -126,13 +128,11 @@ const SidebarChat = ({
     };
   }, [socket, setChatList]);
 
-  // Delete the token
-  const handleLogout = () => {};
 
   const sortedChats = [...chatList].sort((a, b) => a.status - b.status);
 
   return (
-    <div id="SidebarChat">
+    <div className={isInChat ? "IsInChat" : "IsHome"} id="SidebarChat">
       <h2>Chats</h2>
 
       <SidebarNavigation focus={"Home"} areRequest={areRequest} />
@@ -154,7 +154,11 @@ const SidebarChat = ({
         />
       ) : (
         <div className="ChatCards">
-          <ChatCard chats={sortedChats.reverse()} chatId={selectedChatId} />
+          <ChatCard
+            chats={sortedChats.reverse()}
+            chatId={selectedChatId}
+            setIsInChat={setIsInChat}
+          />
         </div>
       )}
     </div>
