@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { socket } from "../utils/SocketConfig";
 import { useChat } from "../context/chatContex";
-import { fetchDataGet, fetchDataPost } from "../utils/fetch";
+import { fetchDataDelete, fetchDataGet, fetchDataPost } from "../utils/fetch";
 import { MenuComponent } from "./Menu";
 
 import SendMessageIcon from "../assets/icons/SendMessage.svg";
@@ -18,7 +18,7 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
   const chatEndRef = useRef(null);
   let { chatId } = useParams();
   let { state } = useLocation();
-  const { setChatList, client } = useChat();
+  const { chatList, setChatList, client } = useChat();
 
   const CurrentUserLogId = userLog.userInfo.id;
 
@@ -52,9 +52,28 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
           .sort((a, b) => b.status - a.status)
       );
 
+      socket.on("deleteChatNotification", (data) => {
+        const DeleteChatId = data.chatId;
+        const NewChatList = chatList.filter(
+          (chat) => chat.chatId !== DeleteChatId
+        );
+        setChatList(NewChatList);
+        if (DeleteChatId !== chatId) {
+          console.log("Delete Message");
+        } else {
+          setLoading(true);
+          navigate("/");
+        }
+      });
+
+      socket.on("clearChatNotification", (data) => {
+        setChat([]);
+      });
+
       return () => {
         socket.off("privateMessage");
         socket.off("JoinRoom");
+        socket.off("deleteChatNotification");
       };
     } else {
       navigate("/");
@@ -98,11 +117,34 @@ const ChatRoom = ({ userLog, setSelectedChatId }) => {
     setMessage("");
   };
 
-  const Delete = () => {
-    console.log("Delete");
+  const Delete = async () => {
+    const res = await fetchDataDelete(`${client}/api/DeleteChats/${chatId}`);
+    if (res.status !== 200) {
+      return;
+    }
+
+    const NewChatList = chatList.filter((chat) => chat.chatId !== chatId);
+
+    setChatList(NewChatList);
+    setLoading(true);
+    navigate("/");
+    socket.emit("deleteChat", {
+      chatId,
+      UserId: ChatInfoUser.id ?? ChatInfoUser.user1,
+    });
   };
-  const ClearChat = () => {
-    console.log("Clear");
+
+  const ClearChat = async () => {
+    const res = await fetchDataDelete(`${client}/api/ClearMessage/${chatId}`);
+    if (res.status !== 200) {
+      return;
+    }
+    socket.emit("clearChat", {
+      chatId,
+      UserId: ChatInfoUser.id ?? ChatInfoUser.user1,
+    });
+
+    setChat([]);
   };
 
   if (loading || ChatInfoUser === undefined) {
