@@ -493,6 +493,10 @@ body {
       }
     }
   }
+  #Chat{
+     min-height: 63vh !important;
+    max-height: 63vh !important;
+  }
   #Home {
     flex-direction: column !important;
     #SidebarChat {
